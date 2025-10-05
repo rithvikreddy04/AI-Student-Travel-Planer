@@ -13,6 +13,7 @@ const IconMap: { [key: string]: React.ReactNode } = {
   adventure: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>,
   nightlife: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" /></svg>,
   default: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" /></svg>,
+  route: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" /></svg>
 };
 
 const getActivityIcon = (description: string): React.ReactNode => {
@@ -22,6 +23,22 @@ const getActivityIcon = (description: string): React.ReactNode => {
     if (desc.includes('hike') || desc.includes('park') || desc.includes('view') || desc.includes('nature') || desc.includes('explore') || desc.includes('walk')) return IconMap.adventure;
     if (desc.includes('bar') || desc.includes('club') || desc.includes('night') || desc.includes('music')) return IconMap.nightlife;
     return IconMap.default;
+};
+
+const generateRouteUrl = (activities: ItineraryPlan['itinerary'][0]['activities']): string => {
+    const validActivities = activities.filter(a => a.location);
+    if (validActivities.length < 2) {
+        if (validActivities.length === 1) {
+            const { latitude, longitude } = validActivities[0].location;
+            return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+        }
+        return '#';
+    }
+    const waypoints = validActivities
+      .map(a => `${a.location.latitude},${a.location.longitude}`)
+      .join('/');
+      
+    return `https://www.google.com/maps/dir/${waypoints}`;
 };
 
 export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan, destination }) => {
@@ -51,12 +68,39 @@ export const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ plan, destin
                   </div>
                   <div className="bg-slate-50 p-4 rounded-lg">
                     <p className="font-semibold text-slate-800">{activity.description}</p>
-                    <p className="text-sm text-green-600 font-medium mt-1">{activity.estimatedCost}</p>
+                     <div className="flex justify-between items-center mt-2">
+                        <p className="text-sm text-green-600 font-medium">{activity.estimatedCost}</p>
+                        {activity.location && (
+                            <a 
+                                href={`https://www.google.com/maps/search/?api=1&query=${activity.location.latitude},${activity.location.longitude}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="flex items-center gap-1 text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+                                aria-label={`View ${activity.description} on map`}
+                            >
+                                {IconMap.adventure}
+                                <span className="hidden sm:inline">View on Map</span>
+                            </a>
+                        )}
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+          {day.activities.some(a => a.location) && (
+             <div className="p-4 bg-slate-50 border-t border-slate-200 text-center">
+                <a
+                    href={generateRouteUrl(day.activities)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-2 bg-white text-indigo-700 font-semibold rounded-full border border-slate-200 shadow-sm hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition"
+                >
+                    {IconMap.route}
+                    View Day's Route on Map
+                </a>
+             </div>
+          )}
         </div>
       ))}
     </div>

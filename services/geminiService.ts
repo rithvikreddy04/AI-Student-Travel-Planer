@@ -31,9 +31,18 @@ const responseSchema = {
               properties: {
                 time: { type: Type.STRING, description: "Suggested time for the activity, e.g., '9:00 AM' or 'Afternoon'." },
                 description: { type: Type.STRING, description: "A detailed, engaging description of the activity, including location and student-friendly tips." },
-                estimatedCost: { type: Type.STRING, description: "Estimated cost for a student, e.g., '~$15' or 'Free'." }
+                estimatedCost: { type: Type.STRING, description: "Estimated cost for a student, e.g., '~$15' or 'Free'." },
+                location: {
+                  type: Type.OBJECT,
+                  description: "The precise geographic coordinates of the activity.",
+                  properties: {
+                    latitude: { type: Type.NUMBER, description: "Latitude coordinate." },
+                    longitude: { type: Type.NUMBER, description: "Longitude coordinate." }
+                  },
+                  required: ["latitude", "longitude"]
+                }
               },
-              required: ["time", "description", "estimatedCost"]
+              required: ["time", "description", "estimatedCost", "location"]
             }
           },
           dailyBudget: { type: Type.STRING, description: "An estimated total budget for the day's activities for a student." }
@@ -60,6 +69,7 @@ export const generateItinerary = async (
 
     Your response must be a JSON object that strictly adheres to the provided schema.
     For each activity, provide a fun, engaging description that would appeal to a student traveler.
+    For each activity, you MUST provide its precise latitude and longitude coordinates.
     Include practical tips like cheap eats, free walking tours, student discounts, or best photo spots.
     Ensure the costs and suggestions are realistic for the specified student budget level.
     The daily title should be creative and reflect the day's main focus.
