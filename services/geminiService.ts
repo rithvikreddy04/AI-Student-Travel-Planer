@@ -31,7 +31,7 @@ const responseSchema = {
               properties: {
                 time: { type: Type.STRING, description: "Suggested time for the activity, e.g., '9:00 AM' or 'Afternoon'." },
                 description: { type: Type.STRING, description: "A detailed, engaging description of the activity, including location and student-friendly tips." },
-                estimatedCost: { type: Type.STRING, description: "Estimated cost for a student, e.g., '~$15' or 'Free'." },
+                estimatedCost: { type: Type.STRING, description: "Estimated cost for a student in Indian Rupees (INR), e.g., '₹500' or 'Free'." },
                 location: {
                   type: Type.OBJECT,
                   description: "The precise geographic coordinates of the activity.",
@@ -45,7 +45,7 @@ const responseSchema = {
               required: ["time", "description", "estimatedCost", "location"]
             }
           },
-          dailyBudget: { type: Type.STRING, description: "An estimated total budget for the day's activities for a student." }
+          dailyBudget: { type: Type.STRING, description: "An estimated total budget for the day's activities for a student in Indian Rupees (INR), e.g., '₹2,500'." }
         },
         required: ["day", "title", "activities", "dailyBudget"]
       }
@@ -66,6 +66,8 @@ export const generateItinerary = async (
     Destination: ${destination}
     Budget Level: ${budget}
     Interests: ${interests.join(', ')}
+
+    IMPORTANT: All cost estimates and daily budgets must be in Indian Rupees (INR). Use the '₹' symbol (e.g., '₹1,200').
 
     Your response must be a JSON object that strictly adheres to the provided schema.
     For each activity, provide a fun, engaging description that would appeal to a student traveler.
